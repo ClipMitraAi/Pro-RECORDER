@@ -1,0 +1,6 @@
+{
+  "name": "Pro Recorder — UI Design Studio & Android App",
+  "description": "Interactive UI Design Studio and full Android screen recorder experience with 6 premium themes, live customizer, and Android CI/CD build export.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
