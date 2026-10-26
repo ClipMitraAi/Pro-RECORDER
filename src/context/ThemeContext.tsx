@@ -252,30 +252,29 @@ jobs:
 
       - name: Generate Wrapper and Build Android Debug APK
         run: |
+          echo "=== 1. Checking permissions ==="
           chmod +x gradlew || true
-          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            gradle wrapper --gradle-version 8.5 --distribution-type bin || true
-            chmod +x gradlew || true
-          fi
 
-          if [ -x "./gradlew" ] && ./gradlew assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx2048m"; then
-            echo "Build with ./gradlew succeeded!"
-          else
-            echo "Fallback to gradle assembleDebug..."
-            gradle assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx2048m"
-          fi
+          echo "=== 2. Generating Gradle Wrapper ==="
+          gradle wrapper --gradle-version 8.5 --distribution-type bin || true
+          chmod +x gradlew || true
+
+          echo "=== 3. Compiling Android Debug APK ==="
+          gradle assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
       - name: Prepare APK for Distribution
         run: |
           mkdir -p output_apks
           APK_FILE=\$(find app/build/outputs/apk/ -name "*.apk" -type f | head -n 1)
           if [ -n "\$APK_FILE" ]; then
+            echo "SUCCESS: Found compiled APK at: \$APK_FILE"
             cp "\$APK_FILE" output_apks/ProRecorder-debug.apk
             ls -lah output_apks/
           else
             echo "Error: No APK file generated!"
             exit 1
           fi
+
 
 
 
