@@ -101,12 +101,14 @@ Agar build me koi bhi error aata hai, toh yaha sabhi tested solutions hain:
 | Problem / Error | Cause | Fix / Solution (Included in Workflow) |
 |---|---|---|
 | **Setup Android SDK problem / crash** | 3rd party `setup-android` action fail hoti hai ya SDK path unset hota hai | **FIXED**: GitHub runner ke pre-installed SDK (`/usr/local/lib/android/sdk`) ko use kiya hai aur `local.properties` me `sdk.dir` auto-write hota hai. |
+| **Generate Wrapper & Build Debug APK problem** | `gradlew: No such file` ya `GradleWrapperMain not found` | **FIXED**: Root me `gradlew` script add kar di gayi hai + Dual Execution Mode: agar `./gradlew` fail hota hai toh workflow automatically direct `gradle assembleDebug` run karta hai. |
 | `SDK location not found / ANDROID_HOME` | Gradle ko Android SDK folder nahi milta | **FIXED**: Workflow step me `echo "sdk.dir=$ANDROID_HOME" > local.properties` create hota hai. |
 | `You have not accepted the license agreements of Android SDK` | CI runner licenses accept nahi karta | **FIXED**: License hashes direct `$ANDROID_HOME/licenses/android-sdk-license` me inject hote hain aur `sdkmanager --licenses` run hota hai. |
 | `gradlew: Permission denied` | Git me gradlew file execute permission me nahi hai | **FIXED**: Workflow me `chmod +x gradlew` laga diya hai, aur `git update-index --chmod=+x gradlew` kar sakte hain. |
 | `Unsupported class file major version 65 / JDK mismatch` | Gradle purane Java version se run ho raha hai | **FIXED**: JDK 17 (`temurin`) strictly configure kiya hai jo AGP 8.x ke liye compatible hai. |
 | `FOREGROUND_SERVICE_MEDIA_PROJECTION missing` | Android 14 (API 34) me screen record permission required hai | **FIXED**: `AndroidManifest.xml` me `FOREGROUND_SERVICE_MEDIA_PROJECTION` aur `RECORD_AUDIO` add kiya gaya hai. |
 | `Resource not accessible by integration (403)` | GitHub token me release write permission nahi hai | **FIXED**: Workflow me `permissions: contents: write` add kar diya gaya hai. |
+
 
 
 ---

@@ -60,18 +60,39 @@ jobs:
 
       - name: Generate Wrapper and Build Android Debug APK
         run: |
-          if [ ! -f "gradlew" ]; then
-            gradle wrapper --gradle-version 8.5
+          echo "=== 1. Checking environment & permissions ==="
+          ls -lah
+          chmod +x gradlew || true
+
+          # Ensure gradle-wrapper.jar exists
+          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+            echo "Generating Gradle wrapper files..."
+            gradle wrapper --gradle-version 8.5 --distribution-type bin || true
+            chmod +x gradlew || true
           fi
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace --no-daemon
+
+          echo "=== 2. Building Android Debug APK ==="
+          # Try building with ./gradlew; if it fails, fallback to direct gradle
+          if [ -x "./gradlew" ] && ./gradlew assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"; then
+            echo "Build with ./gradlew completed successfully!"
+          else
+            echo "Fallback to gradle assembleDebug..."
+            gradle assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"
+          fi
 
       - name: Prepare APK for Distribution
         run: |
           mkdir -p output_apks
-          # Find and copy any generated APK to the distribution directory
-          find app/build/outputs/apk/ -name "*.apk" -exec cp {} output_apks/ProRecorder-debug.apk \;
-          ls -lah output_apks/
+          APK_FILE=$(find app/build/outputs/apk/ -name "*.apk" -type f | head -n 1)
+          if [ -n "$APK_FILE" ]; then
+            echo "Found compiled APK at: $APK_FILE"
+            cp "$APK_FILE" output_apks/ProRecorder-debug.apk
+            ls -lah output_apks/
+          else
+            echo "Error: No APK file generated in app/build/outputs/apk/"
+            exit 1
+          fi
+
 
       - name: Upload Public APK Artifact
         uses: actions/upload-artifact@v4

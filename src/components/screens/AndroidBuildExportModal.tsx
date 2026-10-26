@@ -327,10 +327,18 @@ class ScreenRecorderService : Service() {
                     Workflow me <code className="text-cyan-400">permissions: contents: write</code> add kiya hai taaki Release publish hone par 403 error na aaye.
                   </div>
                 </div>
+
+                <div className="p-2.5 rounded-lg border" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
+                  <div className="font-bold text-emerald-400 mb-0.5">6. Generate Wrapper & Build APK Fallback (Fixed)</div>
+                  <div className="text-slate-300 text-[11px]">
+                    Root me universal <code className="text-cyan-400">gradlew</code> script add kar di gayi hai, aur agar `./gradlew` kisi bhi reason se fail ho, toh workflow automatically fallback karke global <code className="text-cyan-400">gradle assembleDebug</code> run karta hai.
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </div>
+
 
 
         {/* Footer */}
