@@ -83,14 +83,19 @@ Ye pipeline niche diye gaye **exact steps** follow karta hai:
 
 ---
 
-### Step 5: Direct GitHub Release Se APK Download Karna (Optional)
-Agar aap chahte hain ki APK direct "Releases" section me download ke liye available ho:
+### Step 5: Automatic Public GitHub Release (Direct Download)
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-Tag push karte hi GitHub Actions automatically **Release v1.0.0** create kar dega aur `ProRecorder-debug.apk` direct download button ke saath publish ho jayegi!
+Ab har baar jab aap `git push origin main` karenge, toh workflow automatically ek **Public Release** bana dega (tag: `v1.0.BUILD_NUMBER` ke saath).
+
+> ⚠️ **Important One-Time Setting (GitHub Release Ke Liye)**:
+> Agar GitHub par Release publish hone me permission error aaye:
+> 1. Apne GitHub repository me jaye aur **Settings** (Gear icon) par click kare.
+> 2. Left side menu me **Actions** par click karke **General** select kare.
+> 3. Niche scroll karke **"Workflow permissions"** me jaye.
+> 4. **"Read and write permissions"** select kare aur **Save** button dabaye.
+> 
+> Ye karne ke baad GitHub Actions ko Releases publish karne ki full public permission mil jati hai!
+
 
 ---
 
