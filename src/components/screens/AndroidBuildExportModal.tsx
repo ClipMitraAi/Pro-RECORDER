@@ -20,7 +20,7 @@ interface AndroidBuildExportModalProps {
 
 export const AndroidBuildExportModal: React.FC<AndroidBuildExportModalProps> = ({ isOpen, onClose }) => {
   const { theme, generateJetpackComposeCode, generateGithubWorkflowYml } = useTheme();
-  const [activeTab, setActiveTab] = useState<'ci' | 'compose' | 'service' | 'guide'>('ci');
+  const [activeTab, setActiveTab] = useState<'github' | 'ci' | 'compose' | 'service' | 'guide'>('github');
   const [copiedTab, setCopiedTab] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -30,6 +30,22 @@ export const AndroidBuildExportModal: React.FC<AndroidBuildExportModalProps> = (
     setCopiedTab(tabId);
     setTimeout(() => setCopiedTab(null), 2500);
   };
+
+  const gitUploadCommands = `# 1. Terminal me project folder me jaye
+git init
+git add .
+git commit -m "Pro Recorder Android APK build setup"
+git branch -M main
+
+# 2. Apne GitHub repository ka URL connect kare
+git remote add origin https://github.com/mrhellgodji/pro-recorder.git
+
+# 3. Push kare (GitHub Actions automatically APK build start kar dega)
+git push -u origin main
+
+# (Optional) Direct Release APK banane ke liye tag push kare:
+git tag v1.0.0
+git push origin v1.0.0`;
 
   const kotlinServiceSnippet = `// Android Screen Recording Service
 // Foreground Service with MediaProjection & VirtualDisplay
@@ -106,9 +122,9 @@ class ScreenRecorderService : Service() {
               <Smartphone className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold">Android APK CI/CD & Build Pipeline</h2>
+              <h2 className="text-sm font-bold">GitHub APK Build & CI Pipeline</h2>
               <p className="text-[11px]" style={{ color: theme.textMuted }}>
-                Tested GitHub Actions workflow & Jetpack Compose theme code
+                GitHub par upload karke direct APK build kare (Sabhi fixes included)
               </p>
             </div>
           </div>
@@ -135,12 +151,13 @@ class ScreenRecorderService : Service() {
         </div>
 
         {/* Tab navigation */}
-        <div className="flex border-b px-4 gap-2 pt-2" style={{ borderColor: theme.surfaceBorder }}>
+        <div className="flex border-b px-4 gap-2 pt-2 overflow-x-auto no-scrollbar" style={{ borderColor: theme.surfaceBorder }}>
           {[
-            { id: 'ci', label: 'GitHub Actions (.yml)' },
-            { id: 'compose', label: `Jetpack Compose Theme (${theme.name})` },
-            { id: 'service', label: 'Android Recorder Service (Kotlin)' },
-            { id: 'guide', label: 'Zero-Error Build Steps' },
+            { id: 'github', label: '🚀 GitHub Upload Steps' },
+            { id: 'ci', label: '⚙️ GitHub Actions (.yml)' },
+            { id: 'compose', label: `🎨 Compose Theme (${theme.name})` },
+            { id: 'service', label: '📱 Recorder Service' },
+            { id: 'guide', label: '🛠️ All Build Fixes' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -158,6 +175,54 @@ class ScreenRecorderService : Service() {
 
         {/* Tab Content */}
         <div className="flex-1 p-4 overflow-y-auto">
+          {activeTab === 'github' && (
+            <div className="space-y-3.5 text-xs">
+              <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200">
+                <div className="font-bold mb-1 flex items-center gap-1.5 text-sm">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>GitHub Par Upload Karke APK Kaise Banaye (Complete Process)</span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  Is repository me GitHub Actions workflow file <code className="text-cyan-300">.github/workflows/build-apk.yml</code> aur pura Android project structure pehle se ready hai. Aapko bas GitHub par push karna hai!
+                </p>
+              </div>
+
+              {/* Step 1 */}
+              <div className="p-3 rounded-xl border space-y-1.5" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
+                <div className="font-bold text-white flex items-center justify-between">
+                  <span>1. GitHub Par Repository Banaye & Code Push Kare</span>
+                  <button
+                    onClick={() => handleCopy(gitUploadCommands, 'git')}
+                    className="px-2 py-0.5 rounded text-[10px] font-mono border flex items-center gap-1"
+                    style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}
+                  >
+                    {copiedTab === 'git' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedTab === 'git' ? 'Copied Commands!' : 'Copy Commands'}</span>
+                  </button>
+                </div>
+                <pre className="p-2.5 rounded-lg bg-slate-950 text-emerald-300 font-mono text-[11px] overflow-x-auto">
+                  {gitUploadCommands}
+                </pre>
+              </div>
+
+              {/* Step 2 */}
+              <div className="p-3 rounded-xl border space-y-1" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
+                <div className="font-bold text-white">2. Automatic Build Pipeline Check Kare</div>
+                <p className="text-slate-300 text-[11px]">
+                  GitHub repo me jakar top par <strong>"Actions"</strong> tab par click kare. Aapko <strong>"Android CI - Build & Release APK"</strong> workflow chalta hua dikhega (2–3 minutes me complete ho jata hai).
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="p-3 rounded-xl border space-y-1" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
+                <div className="font-bold text-white">3. APK File Download Kare</div>
+                <p className="text-slate-300 text-[11px]">
+                  Workflow run complete hone par green tick ✅ aayega. Uske andar scroll down karke <strong>Artifacts</strong> me se <strong>`ProRecorder-Android-APK`</strong> download kare!
+                </p>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'ci' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -220,45 +285,53 @@ class ScreenRecorderService : Service() {
               <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200">
                 <div className="font-bold mb-1 flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>Zero-Error Android Build Configuration: Fix rhe sab</span>
+                  <span>Zero-Error Android Build Configuration: Sab Fix Hai</span>
                 </div>
                 <p className="text-[11px]">
-                  Follow these 5 essential steps in your Android project repository to ensure Gradle builds without missing licenses or JDK mismatch errors.
+                  Build me koi problem na aaye iske liye ye saare fixes workflow aur project me pehle se configure kar diye gaye hain:
                 </p>
               </div>
 
               <div className="space-y-2">
                 <div className="p-2.5 rounded-lg border" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
-                  <div className="font-bold text-emerald-400 mb-0.5">1. JDK 17 Configuration</div>
+                  <div className="font-bold text-emerald-400 mb-0.5">1. JDK 17 Configuration (Fixed)</div>
                   <div className="text-slate-300 text-[11px]">
-                    Use Eclipse Temurin JDK 17. Android Gradle Plugin 8.x requires Java 17 for bytecode compatibility.
+                    Eclipse Temurin JDK 17 use kiya gaya hai. Android Gradle Plugin 8.x ke saath koi version clash nahi hoga.
                   </div>
                 </div>
 
                 <div className="p-2.5 rounded-lg border" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
-                  <div className="font-bold text-emerald-400 mb-0.5">2. SDK License Auto-Acceptance</div>
+                  <div className="font-bold text-emerald-400 mb-0.5">2. SDK License Auto-Acceptance (Fixed)</div>
                   <div className="text-slate-300 text-[11px]">
-                    The workflow runs <code className="text-cyan-400">yes | sdkmanager --licenses</code> to bypass interactive prompt halts in CI.
+                    Workflow automatically <code className="text-cyan-400">yes | sdkmanager --licenses</code> run karta hai taaki license agreement prompt par build freeze na ho.
                   </div>
                 </div>
 
                 <div className="p-2.5 rounded-lg border" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
-                  <div className="font-bold text-emerald-400 mb-0.5">3. Gradle Wrapper Execution Permissions</div>
+                  <div className="font-bold text-emerald-400 mb-0.5">3. Gradle Wrapper Execution Permissions (Fixed)</div>
                   <div className="text-slate-300 text-[11px]">
-                    Run <code className="text-cyan-400">git update-index --chmod=+x gradlew</code> locally or let CI run <code className="text-cyan-400">chmod +x gradlew</code> before executing.
+                    Workflow me <code className="text-cyan-400">chmod +x gradlew</code> automated hai taaki "Permission denied" error na aaye.
                   </div>
                 </div>
 
                 <div className="p-2.5 rounded-lg border" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
-                  <div className="font-bold text-emerald-400 mb-0.5">4. MediaProjection Permission in AndroidManifest.xml</div>
+                  <div className="font-bold text-emerald-400 mb-0.5">4. MediaProjection Permission (Android 14+ Fixed)</div>
                   <div className="text-slate-300 text-[11px]">
-                    Add <code className="text-amber-400">&lt;uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" /&gt;</code> for Android 14+ support.
+                    `AndroidManifest.xml` me <code className="text-amber-400">FOREGROUND_SERVICE_MEDIA_PROJECTION</code> aur <code className="text-amber-400">RECORD_AUDIO</code> declare kar diya gaya hai.
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-lg border" style={{ backgroundColor: theme.surfaceColor, borderColor: theme.surfaceBorder }}>
+                  <div className="font-bold text-emerald-400 mb-0.5">5. GitHub Release Permissions (Fixed)</div>
+                  <div className="text-slate-300 text-[11px]">
+                    Workflow me <code className="text-cyan-400">permissions: contents: write</code> add kiya hai taaki Release publish hone par 403 error na aaye.
                   </div>
                 </div>
               </div>
             </div>
           )}
         </div>
+
 
         {/* Footer */}
         <div className="p-3 border-t flex items-center justify-between text-xs" style={{ borderColor: theme.surfaceBorder }}>
