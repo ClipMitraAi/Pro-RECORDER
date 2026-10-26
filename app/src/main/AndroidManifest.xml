@@ -13,16 +13,16 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:label="Pro Recorder"
-        android:roundIcon="@android:drawable/ic_menu_camera"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.NoActionBar">
+        android:theme="@style/Theme.ProRecorder">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.NoActionBar">
+            android:theme="@style/Theme.ProRecorder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
