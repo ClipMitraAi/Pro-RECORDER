@@ -60,15 +60,14 @@ Ye pipeline niche diye gaye **exact steps** follow karta hai:
 1. **Set up job**: GitHub Actions runner (Ubuntu) initialize hota hai.
 2. **Checkout Repository**: Code repository se clone kiya jata hai (`actions/checkout@v4`).
 3. **Set up JDK 17**: Eclipse Temurin Java 17 configure hota hai (`actions/setup-java@v4`).
-4. **Setup Android SDK**: Android SDK command-line tools install hote hain (`android-actions/setup-android@v3`).
-5. **Configure Android SDK & Accept Licenses**: Saare Android licenses automatically accept ho jaate hain (`yes | sdkmanager --licenses`).
-6. **Setup Gradle**: Gradle 8.5 build tool setup hota hai (`gradle/actions/setup-gradle@v3`).
-7. **Generate Wrapper and Build Android Debug APK**: `./gradlew assembleDebug` run hota hai aur APK compile hoti hai.
-8. **Prepare APK for Distribution**: Output APK ko `output_apks/ProRecorder-debug.apk` me copy kiya jata hai.
-9. **Upload Public APK Artifact**: Compiled APK artifact upload ho jati hai (`actions/upload-artifact@v4`).
-10. **Publish Public GitHub Release**: Agar tag push kiya hai ya manual run kiya hai, toh direct GitHub Release ban jati hai.
-11. **Post Set up JDK 17** & **Post Checkout Repository**: Cache aur resources clean up hote hain.
-12. **Complete job**: Build success ho jati hai!
+4. **Setup Android SDK & Accept Licenses**: Pre-installed Android SDK (`/usr/local/lib/android/sdk`) ko `local.properties` ke saath map kiya jata hai aur saare license hashes automatically inject ho jaate hain (No third-party action crash!).
+5. **Setup Gradle**: Gradle 8.5 build tool setup hota hai (`gradle/actions/setup-gradle@v3`).
+6. **Generate Wrapper and Build Android Debug APK**: `./gradlew assembleDebug` run hota hai aur APK compile hoti hai.
+7. **Prepare APK for Distribution**: Output APK ko `output_apks/ProRecorder-debug.apk` me copy kiya jata hai.
+8. **Upload Public APK Artifact**: Compiled APK artifact upload ho jati hai (`actions/upload-artifact@v4`).
+9. **Publish Public GitHub Release**: Agar tag push kiya hai ya manual run kiya hai, toh direct GitHub Release ban jati hai.
+10. **Post Set up JDK 17** & **Post Checkout Repository**: Cache aur resources clean up hote hain.
+11. **Complete job**: Build success ho jati hai!
 
 ---
 
@@ -101,11 +100,14 @@ Agar build me koi bhi error aata hai, toh yaha sabhi tested solutions hain:
 
 | Problem / Error | Cause | Fix / Solution (Included in Workflow) |
 |---|---|---|
-| `gradlew: Permission denied` | Git me gradlew file execute permission me nahi hai | Workflow me `chmod +x gradlew` laga diya hai, aur `git update-index --chmod=+x gradlew` kar sakte hain |
-| `You have not accepted the license agreements of Android SDK` | CI runner licenses accept nahi karta | Workflow me `yes \| sdkmanager --licenses` automatically run hota hai |
-| `Unsupported class file major version 65 / JDK mismatch` | Gradle purane Java version se run ho raha hai | JDK 17 (`temurin`) strictly configure kiya hai jo AGP 8.x ke liye compatible hai |
-| `FOREGROUND_SERVICE_MEDIA_PROJECTION missing` | Android 14 (API 34) me screen record permission required hai | `AndroidManifest.xml` me `FOREGROUND_SERVICE_MEDIA_PROJECTION` aur `RECORD_AUDIO` add kiya gaya hai |
-| `Resource not accessible by integration (403)` | GitHub token me release write permission nahi hai | Workflow me `permissions: contents: write` add kar diya gaya hai |
+| **Setup Android SDK problem / crash** | 3rd party `setup-android` action fail hoti hai ya SDK path unset hota hai | **FIXED**: GitHub runner ke pre-installed SDK (`/usr/local/lib/android/sdk`) ko use kiya hai aur `local.properties` me `sdk.dir` auto-write hota hai. |
+| `SDK location not found / ANDROID_HOME` | Gradle ko Android SDK folder nahi milta | **FIXED**: Workflow step me `echo "sdk.dir=$ANDROID_HOME" > local.properties` create hota hai. |
+| `You have not accepted the license agreements of Android SDK` | CI runner licenses accept nahi karta | **FIXED**: License hashes direct `$ANDROID_HOME/licenses/android-sdk-license` me inject hote hain aur `sdkmanager --licenses` run hota hai. |
+| `gradlew: Permission denied` | Git me gradlew file execute permission me nahi hai | **FIXED**: Workflow me `chmod +x gradlew` laga diya hai, aur `git update-index --chmod=+x gradlew` kar sakte hain. |
+| `Unsupported class file major version 65 / JDK mismatch` | Gradle purane Java version se run ho raha hai | **FIXED**: JDK 17 (`temurin`) strictly configure kiya hai jo AGP 8.x ke liye compatible hai. |
+| `FOREGROUND_SERVICE_MEDIA_PROJECTION missing` | Android 14 (API 34) me screen record permission required hai | **FIXED**: `AndroidManifest.xml` me `FOREGROUND_SERVICE_MEDIA_PROJECTION` aur `RECORD_AUDIO` add kiya gaya hai. |
+| `Resource not accessible by integration (403)` | GitHub token me release write permission nahi hai | **FIXED**: Workflow me `permissions: contents: write` add kar diya gaya hai. |
+
 
 ---
 

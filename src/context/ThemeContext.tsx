@@ -224,29 +224,46 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Configure Android SDK & Accept Licenses
+      - name: Setup Android SDK & Accept Licenses
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          # Use pre-installed Android SDK on GitHub Ubuntu runner
+          export ANDROID_HOME=\${ANDROID_HOME:-/usr/local/lib/android/sdk}
+          export ANDROID_SDK_ROOT=\${ANDROID_SDK_ROOT:-\$ANDROID_HOME}
+          echo "sdk.dir=\$ANDROID_HOME" > local.properties
+
+          # Add commandline tools and platform tools to PATH
+          export PATH=\$ANDROID_HOME/cmdline-tools/latest/bin:\$ANDROID_HOME/platform-tools:\$PATH
+          
+          # Auto-accept all Android SDK licenses directly into license files
+          mkdir -p "\$ANDROID_HOME/licenses"
+          echo -e "24333f8a63b6825ea9c5514f83c2829b004d1fee\\nd56f5187479451eabf01fb78af6dfcb131a6481e\\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > "\$ANDROID_HOME/licenses/android-sdk-license"
+          echo -e "84831b9409646a918e30573bab4c9c91346d8abd" > "\$ANDROID_HOME/licenses/android-sdk-preview-license"
+          
+          if command -v sdkmanager &> /dev/null; then
+            yes | sdkmanager --licenses || true
+          elif [ -f "\$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+            yes | "\$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+          fi
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: wrapper
+          gradle-version: 8.5
 
       - name: Generate Wrapper and Build Android Debug APK
         run: |
-          chmod +x gradlew || gradle wrapper
-          ./gradlew assembleDebug --stacktrace
+          if [ ! -f "gradlew" ]; then
+            gradle wrapper --gradle-version 8.5
+          fi
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace --no-daemon
 
       - name: Prepare APK for Distribution
         run: |
           mkdir -p output_apks
-          cp app/build/outputs/apk/debug/*.apk output_apks/ProRecorder-debug.apk
+          find app/build/outputs/apk/ -name "*.apk" -exec cp {} output_apks/ProRecorder-debug.apk \\;
           ls -lah output_apks/
+
 
       - name: Upload Public APK Artifact
         uses: actions/upload-artifact@v4
